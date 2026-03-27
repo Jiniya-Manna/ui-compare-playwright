@@ -227,6 +227,7 @@ export async function removeOtherPopups(page: any) {
 }
 
 // Test environment function
+// Test environment function
 export async function testEnvironment(
   page: any,
   url: string,
@@ -242,6 +243,23 @@ export async function testEnvironment(
 
   await page.waitForLoadState("networkidle");
   await page.waitForTimeout(5000); // Extra wait for content to load
+
+  // Handle "See More" button if it exists
+  try {
+    console.log("Looking for 'See More' button...");
+    const seeMoreButton = page.locator('button:has-text("See More"), a:has-text("See More"), button:has-text("Load More"), a:has-text("Load More")').first();
+    if (await seeMoreButton.isVisible()) {
+      console.log("Found 'See More' button, clicking it...");
+      await seeMoreButton.click();
+      await page.waitForTimeout(3000); // Wait for content to load
+      await page.waitForLoadState("networkidle");
+      console.log("'See More' button clicked and content loaded");
+    } else {
+      console.log("No 'See More' button found");
+    }
+  } catch (error) {
+    console.log("Error handling 'See More' button:", error);
+  }
 
   // Add debug info before analysis
   console.log(`=== BEFORE ANALYSIS - ${url} ===`);
@@ -260,7 +278,7 @@ export async function testEnvironment(
     path: join(screenshotDir, `${url === ENV_CONFIG.ENV1_URL ? "env1" : "env2"}_${pageName}.png`),
   });
 
-  // Return the full analysis data, not nested
+  // Return full analysis data, not nested
   return { 
     sections: analysisData.sections, 
     screenshot, 

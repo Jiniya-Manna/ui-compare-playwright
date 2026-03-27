@@ -15,6 +15,7 @@
     "test:value-assessments": "rm -rf test-results && npx playwright test tests/deal-accelerators/value-assessments-compare.spec.ts --project=chrome --reporter=line",
     "test:value-coach": "rm -rf test-results && npx playwright test tests/deal-accelerators/value-coach-compare.spec.ts --project=chrome --reporter=line",
     "test:value-of-val": "rm -rf test-results && npx playwright test tests/value-of-val/value-of-val-compare.spec.ts --project=chrome --reporter=line",
+    "test:blog": "rm -rf test-results && npx playwright test tests/resources/blog-compare.spec.ts --project=chrome --reporter=line",
     "install-deps": "playwright install",
     "open-homepage": "open test-results/homepage-latest-comparison.html",
     "open-about-us": "open test-results/about-us-latest-comparison.html",
@@ -26,6 +27,7 @@
     "open-value-assessments": "open test-results/value-assessments-latest-comparison.html",
     "open-value-coach": "open test-results/value-coach-latest-comparison.html",
     "open-value-of-val": "open test-results/value-of-val-latest-comparison.html",
+    "open-blog": "open test-results/blog-latest-comparison.html",
     "test-homepage": "npm run test:homepage && npm run open-homepage",
     "test-about-us": "npm run test:about-us && npm run open-about-us",
     "test-meet-the-team": "npm run test:meet-the-team && npm run open-meet-the-team",
@@ -35,7 +37,8 @@
     "test-opportunity-strategy": "npm run test:opportunity-strategy && npm run open-opportunity-strategy",
     "test-value-assessments": "npm run test:value-assessments && npm run open-value-assessments",
     "test-value-coach": "npm run test:value-coach && npm run open-value-coach",
-    "test-value-of-val": "npm run test:value-of-val && npm run open-value-of-val"
+    "test-value-of-val": "npm run test:value-of-val && npm run open-value-of-val",
+    "test-blog": "npm run test:blog && npm run open-blog"
 
 
   },
