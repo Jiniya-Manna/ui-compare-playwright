@@ -10,41 +10,70 @@ export const ENV_CONFIG = {
   ENV2_NAME: "Production",
 };
 
-// Page analysis function
+// Page analysis function - enhanced to capture actual content
 export async function analyzePage(page: any) {
-  return await page.evaluate(() => {
-    const getElements = (selector: string) =>
-      Array.from(document.querySelectorAll(selector)).map((el: Element) => {
-        const rect = el.getBoundingClientRect();
+  const title = await page.title();
+  const url = page.url();
+  
+  // Wait a bit more for content to load
+  await page.waitForTimeout(2000);
+  
+  try {
+    // Get all visible text content with better extraction
+    const bodyText = await page.evaluate(() => {
+      const text = document.body.innerText || "";
+      return text.replace(/\s+/g, ' ').trim().substring(0, 3000);
+    });
+    
+    // Get all headings with better extraction
+    const headings = await page.evaluate(() => {
+      const headingElements = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
+      return Array.from(headingElements).map((el: any) => {
+        const text = el.innerText?.trim() || "";
+        return text;
+      }).filter((text: string) => text.length > 0);
+    });
+    
+    // Get all sections/containers with text
+    const sections = await page.evaluate(() => {
+      const sectionElements = document.querySelectorAll("section, header, nav, main, footer, div, article, aside");
+      return Array.from(sectionElements).map((el: any) => {
+        const text = el.innerText?.trim() || "";
+        const hasText = text.length > 10;
         return {
           tagName: el.tagName.toLowerCase(),
           className: el.className,
           id: el.id,
-          text: (el as HTMLElement).innerText?.substring(0, 200) || "",
-          top: rect.top,
-          height: rect.height,
-          visible: rect.height > 0,
+          text: text.substring(0, 150),
+          hasText
         };
-      });
-
+      }).filter((section: any) => section.hasText);
+    });
+    
+    console.log("Page analysis successful - text:", bodyText.length, "headings:", headings.length, "sections:", sections.length);
+    
     return {
-      sections: getElements("section, header, nav, main, footer, .section, .container"),
-      headings: Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"))
-        .map((el: Element, index: number) => {
-          const rect = el.getBoundingClientRect();
-          return {
-            index,
-            level: parseInt(el.tagName.substring(1)),
-            text: (el as HTMLElement).innerText?.trim() || "",
-            top: rect.top,
-            visible: rect.height > 0,
-          };
-        }),
+      title,
+      url,
+      bodyText,
+      headings,
+      sections,
+      hasContent: bodyText.length > 0 || headings.length > 0 || sections.length > 0
     };
-  });
+  } catch (error) {
+    console.log("Text extraction failed:", error);
+    return {
+      title,
+      url,
+      bodyText: "",
+      headings: [],
+      sections: [],
+      hasContent: false
+    };
+  }
 }
 
-// Enhanced mismatch detection with section content analysis
+// Enhanced mismatch detection with actual section comparison
 export function generateMismatchPoints(
   env1Data: any,
   env2Data: any,
@@ -58,33 +87,109 @@ export function generateMismatchPoints(
 ) {
   const points = [];
 
-  // Check sections count
-  if (env1Data.sections && env2Data.sections && env1Data.sections.length !== env2Data.sections.length) {
-    const diff = env1Data.sections.length - env2Data.sections.length;
-    points.push(
-      `Sections: ${
-        diff > 0
-          ? diff + " missing in Production"
-          : Math.abs(diff) + " missing in Staging"
-      }`,
-    );
+  console.log("=== ENHANCED COMPARISON DEBUG ===");
+  console.log("Env1 has content:", env1Data.hasContent);
+  console.log("Env2 has content:", env2Data.hasContent);
+  console.log("Env1 body text length:", env1Data.bodyText?.length || 0);
+  console.log("Env2 body text length:", env2Data.bodyText?.length || 0);
+  console.log("Env1 headings:", env1Data.headings?.length || 0);
+  console.log("Env2 headings:", env2Data.headings?.length || 0);
+  console.log("Env1 sections:", env1Data.sections?.length || 0);
+  console.log("Env2 sections:", env2Data.sections?.length || 0);
+
+  // Compare sections and identify missing content
+  if (env1Data.sections && env2Data.sections && env1Data.sections.length > 0 && env2Data.sections.length > 0) {
+    const env1SectionTexts = env1Data.sections.map((s: any) => s.text.toLowerCase().trim()).filter((t: string) => t);
+    const env2SectionTexts = env2Data.sections.map((s: any) => s.text.toLowerCase().trim()).filter((t: string) => t);
+    
+    console.log("Env1 section texts:", env1SectionTexts.slice(0, 5));
+    console.log("Env2 section texts:", env2SectionTexts.slice(0, 5));
+    
+    // Find sections missing in production (env2)
+    env1Data.sections.forEach((section: any) => {
+      const sectionText = section.text.toLowerCase().trim();
+      if (sectionText && sectionText.length > 15 && !env2SectionTexts.includes(sectionText)) {
+        points.push(`Missing in Production: ${section.tagName.toUpperCase()} "${section.text}"`);
+      }
+    });
+    
+    // Find sections missing in staging (env1)
+    env2Data.sections.forEach((section: any) => {
+      const sectionText = section.text.toLowerCase().trim();
+      if (sectionText && sectionText.length > 15 && !env1SectionTexts.includes(sectionText)) {
+        points.push(`Missing in Staging: ${section.tagName.toUpperCase()} "${section.text}"`);
+      }
+    });
   }
 
-  // Check headings count
-  if (env1Data.headings && env2Data.headings && env1Data.headings.length !== env2Data.headings.length) {
-    const diff = env1Data.headings.length - env2Data.headings.length;
-    points.push(
-      `Headings: ${
-        diff > 0
-          ? diff + " missing in Production"
-          : Math.abs(diff) + " missing in Staging"
-      }`,
-    );
+  // Compare headings
+  if (env1Data.headings && env2Data.headings) {
+    const env1HeadingTexts = env1Data.headings.map((h: string) => h.toLowerCase().trim()).filter((t: string) => t);
+    const env2HeadingTexts = env2Data.headings.map((h: string) => h.toLowerCase().trim()).filter((t: string) => t);
+    
+    console.log("Env1 heading texts:", env1HeadingTexts.slice(0, 3));
+    console.log("Env2 heading texts:", env2HeadingTexts.slice(0, 3));
+    
+    // Find headings missing in production
+    env1Data.headings.forEach((heading: string) => {
+      const headingText = heading.toLowerCase().trim();
+      if (headingText && headingText.length > 5 && !env2HeadingTexts.includes(headingText)) {
+        points.push(`Missing in Production: Heading "${heading}"`);
+      }
+    });
+    
+    // Find headings missing in staging
+    env2Data.headings.forEach((heading: string) => {
+      const headingText = heading.toLowerCase().trim();
+      if (headingText && headingText.length > 5 && !env1HeadingTexts.includes(headingText)) {
+        points.push(`Missing in Staging: Heading "${heading}"`);
+      }
+    });
   }
 
-  if (!sizeMatch) points.push(`Size difference: ${(sizeDifference / 1024).toFixed(2)} KB (${differencePercent.toFixed(2)}%)`);
+  // Compare body text for missing content
+  if (env1Data.bodyText && env2Data.bodyText && env1Data.bodyText !== env2Data.bodyText) {
+    // Find missing text chunks
+    const env1Sentences = env1Data.bodyText.split('.').filter((s: string) => s.trim().length > 15);
+    const env2Sentences = env2Data.bodyText.split('.').filter((s: string) => s.trim().length > 15);
+    
+    env1Sentences.forEach((sentence: string) => {
+      if (!env2Data.bodyText.includes(sentence.trim())) {
+        points.push(`Missing in Production: "${sentence.trim().substring(0, 100)}..."`);
+      }
+    });
+    
+    env2Sentences.forEach((sentence: string) => {
+      if (!env1Data.bodyText.includes(sentence.trim())) {
+        points.push(`Missing in Staging: "${sentence.trim().substring(0, 100)}..."`);
+      }
+    });
+  }
+
+  // Add visual difference information
+  if (!sizeMatch) {
+    points.push(`Visual difference: ${(sizeDifference / 1024).toFixed(2)} KB (${differencePercent.toFixed(2)}%)`);
+    
+    if (differencePercent > 20) {
+      points.push("Major visual differences detected");
+    } else if (differencePercent > 10) {
+      points.push("Significant visual differences detected");
+    } else if (differencePercent > 5) {
+      points.push("Moderate visual differences detected");
+    }
+  }
+
+  // Add general mismatch information
   if (!titleMatch) points.push(`Title differs: "${env1Title}" vs "${env2Title}"`);
   if (!urlStructureMatch) points.push("URL structure mismatch between environments");
+
+  // If no content was extracted
+  if (!env1Data.hasContent && !env2Data.hasContent) {
+    points.push("Content extraction failed - comparison based on screenshots only");
+  }
+
+  console.log("Final mismatch points:", points);
+  console.log("=== END ENHANCED COMPARISON DEBUG ===");
   
   return points;
 }
@@ -136,15 +241,35 @@ export async function testEnvironment(
   await removeOtherPopups(page);
 
   await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(5000); // Extra wait for content to load
 
-  const sections = await analyzePage(page);
+  // Add debug info before analysis
+  console.log(`=== BEFORE ANALYSIS - ${url} ===`);
+  console.log("Page title:", await page.title());
+  console.log("Page URL:", page.url());
+  
+  const analysisData = await analyzePage(page);
+  
+  console.log(`=== AFTER ANALYSIS - ${url} ===`);
+  console.log("Sections found:", analysisData.sections?.length || 0);
+  console.log("Headings found:", analysisData.headings?.length || 0);
+  console.log("Body text length:", analysisData.bodyText?.length || 0);
 
   const screenshot = await page.screenshot({
     fullPage: true,
     path: join(screenshotDir, `${url === ENV_CONFIG.ENV1_URL ? "env1" : "env2"}_${pageName}.png`),
   });
 
-  return { sections, screenshot, title: await page.title(), url: page.url() };
+  // Return the full analysis data, not nested
+  return { 
+    sections: analysisData.sections, 
+    screenshot, 
+    title: analysisData.title || await page.title(), 
+    url: analysisData.url || page.url(),
+    bodyText: analysisData.bodyText,
+    headings: analysisData.headings,
+    hasContent: analysisData.hasContent
+  };
 }
 
 // Generate comparison data

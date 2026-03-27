@@ -25,7 +25,18 @@
     "open-opportunity-strategy": "open test-results/opportunity-strategy-latest-comparison.html",
     "open-value-assessments": "open test-results/value-assessments-latest-comparison.html",
     "open-value-coach": "open test-results/value-coach-latest-comparison.html",
-    "open-value-of-val": "open test-results/value-of-val-latest-comparison.html"
+    "open-value-of-val": "open test-results/value-of-val-latest-comparison.html",
+    "test-homepage": "npm run test:homepage && npm run open-homepage",
+    "test-about-us": "npm run test:about-us && npm run open-about-us",
+    "test-meet-the-team": "npm run test:meet-the-team && npm run open-meet-the-team",
+    "test-contact-us": "npm run test:contact-us && npm run open-contact-us",
+    "test-use-cases": "npm run test:use-cases && npm run open-use-cases",
+    "test-account-strategy": "npm run test:account-strategy && npm run open-account-strategy",
+    "test-opportunity-strategy": "npm run test:opportunity-strategy && npm run open-opportunity-strategy",
+    "test-value-assessments": "npm run test:value-assessments && npm run open-value-assessments",
+    "test-value-coach": "npm run test:value-coach && npm run open-value-coach",
+    "test-value-of-val": "npm run test:value-of-val && npm run open-value-of-val"
+
 
   },
   "devDependencies": {
