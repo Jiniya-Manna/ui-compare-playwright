@@ -16,6 +16,9 @@
     "test:value-coach": "rm -rf test-results && npx playwright test tests/deal-accelerators/value-coach-compare.spec.ts --project=chrome --reporter=line",
     "test:value-of-val": "rm -rf test-results && npx playwright test tests/value-of-val/value-of-val-compare.spec.ts --project=chrome --reporter=line",
     "test:blog": "rm -rf test-results && npx playwright test tests/resources/blog-compare.spec.ts --project=chrome --reporter=line",
+    "test:individual-blog": "rm -rf test-results && npx playwright test tests/resources/individual-blog-compare.spec.ts --project=chrome --reporter=line",
+    "test:blog-tag": "rm -rf test-results && npx playwright test tests/resources/blog-tag-compare.spec.ts --project=chrome --reporter=line",
+    "test:blog-category": "rm -rf test-results && npx playwright test tests/resources/blog-category-compare.spec.ts --project=chrome --reporter=line",
     "install-deps": "playwright install",
     "open-homepage": "open test-results/homepage-latest-comparison.html",
     "open-about-us": "open test-results/about-us-latest-comparison.html",
@@ -28,6 +31,9 @@
     "open-value-coach": "open test-results/value-coach-latest-comparison.html",
     "open-value-of-val": "open test-results/value-of-val-latest-comparison.html",
     "open-blog": "open test-results/blog-latest-comparison.html",
+    "open-individual-blog": "node scripts/open-latest-individual-blog.js",
+    "open-blog-tag": "node scripts/open-latest-blog-tag.js",
+    "open-blog-category": "node scripts/open-latest-blog-category.js",
     "test-homepage": "npm run test:homepage && npm run open-homepage",
     "test-about-us": "npm run test:about-us && npm run open-about-us",
     "test-meet-the-team": "npm run test:meet-the-team && npm run open-meet-the-team",
@@ -38,7 +44,10 @@
     "test-value-assessments": "npm run test:value-assessments && npm run open-value-assessments",
     "test-value-coach": "npm run test:value-coach && npm run open-value-coach",
     "test-value-of-val": "npm run test:value-of-val && npm run open-value-of-val",
-    "test-blog": "npm run test:blog && npm run open-blog"
+    "test-blog": "npm run test:blog && npm run open-blog",
+    "test-individual-blog": "npm run test:individual-blog && npm run open-individual-blog",
+    "test-blog-tag": "npm run test:blog-tag && npm run open-blog-tag",
+    "test-blog-category": "npm run test:blog-category && npm run open-blog-category"
 
 
   },
