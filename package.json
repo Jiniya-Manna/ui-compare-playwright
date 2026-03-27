@@ -1,0 +1,35 @@
+{
+  "name": "ui-compare-playwright",
+  "version": "1.0.0",
+  "description": "Automated UI comparison between two environments",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:homepage": "rm -rf test-results && npx playwright test tests/home/homepage-compare.spec.ts --project=chrome --reporter=line",
+    "test:about-us": "rm -rf test-results && npx playwright test tests/company/about-us-compare.spec.ts --project=chrome --reporter=line",
+    "test:meet-the-team": "rm -rf test-results && npx playwright test tests/company/meet-the-team-compare.spec.ts --project=chrome --reporter=line",
+    "test:contact-us": "rm -rf test-results && npx playwright test tests/company/contact-us-compare.spec.ts --project=chrome --reporter=line",
+    "test:use-cases": "rm -rf test-results && npx playwright test tests/use-cases/use-cases-compare.spec.ts --project=chrome",
+    "test:account-strategy": "rm -rf test-results && npx playwright test tests/deal-accelerators/account-strategy-compare.spec.ts --project=chrome --reporter=line",
+    "test:opportunity-strategy": "rm -rf test-results && npx playwright test tests/deal-accelerators/opportunity-strategy-compare.spec.ts --project=chrome --reporter=line",
+    "test:value-assessments": "rm -rf test-results && npx playwright test tests/deal-accelerators/value-assessments-compare.spec.ts --project=chrome --reporter=line",
+    "test:value-coach": "rm -rf test-results && npx playwright test tests/deal-accelerators/value-coach-compare.spec.ts --project=chrome --reporter=line",
+    "test:value-of-val": "rm -rf test-results && npx playwright test tests/value-of-val/value-of-val-compare.spec.ts --project=chrome --reporter=line",
+    "install-deps": "playwright install",
+    "open-homepage": "open test-results/homepage-latest-comparison.html",
+    "open-about-us": "open test-results/about-us-latest-comparison.html",
+    "open-meet-the-team": "open test-results/meet-the-team-latest-comparison.html",
+    "open-contact-us": "open test-results/contact-us-latest-comparison.html",
+    "open-use-cases": "open test-results/use-cases-latest-comparison.html",
+    "open-account-strategy": "open test-results/account-strategy-latest-comparison.html",
+    "open-opportunity-strategy": "open test-results/opportunity-strategy-latest-comparison.html",
+    "open-value-assessments": "open test-results/value-assessments-latest-comparison.html",
+    "open-value-coach": "open test-results/value-coach-latest-comparison.html",
+    "open-value-of-val": "open test-results/value-of-val-latest-comparison.html"
+
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.0.0"
+  }
+}
